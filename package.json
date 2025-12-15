@@ -1,0 +1,13 @@
+{
+    "name": "commentme",
+    "version": "1.0.0",
+    "type": "module",
+    "bin": {
+        "commentme": "./bin/commentme.js"
+    },
+    "dependencies": {
+        "acorn": "^8.15.0",
+        "bcryptjs": "^3.0.3",
+        "mongoose": "^9.0.1"
+    }
+}
