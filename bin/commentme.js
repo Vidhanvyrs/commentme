@@ -8,14 +8,10 @@ import { editComment } from "../editcoms.js";
 import { deleteComment } from "../deletecoms.js";
 import { removeCommentsFromFile as skim } from "../skimcoms.js";
 import { unskimComments as unskim } from "../unskimcoms.js";
-import { connectDB } from "../config/db.js";
+import { connectDB, disconnectDB } from "../config/db.js";
 import { ensureAuth } from "../auth/authGuard.js";
+import { logout } from "../auth/logout.js";
 
-await connectDB();
-await ensureAuth();
-
-const args = process.argv.slice(2);
-const command = args[0];
 
 function promptInput(defaultValue = "") {
   const rl = readline.createInterface({
@@ -31,8 +27,14 @@ function promptInput(defaultValue = "") {
   });
 }
 
-(async () => {
+async function main() {
+  const args = process.argv.slice(2);
+  const command = args[0];
+
   try {
+    await connectDB();
+    await ensureAuth();
+
     switch (command) {
 
       case "--get":
@@ -73,12 +75,18 @@ function promptInput(defaultValue = "") {
       }
 
       case "--skim":
+        if (!args[1]) throw new Error("Usage: commentme --skim <file>");
         skim(args[1]);
         break;
 
       case "--unskim":
+        if (!args[1]) throw new Error("Usage: commentme --unskim <file>");
         unskim(args[1]);
         break;
+      
+        case "--logout":
+          logout();
+          break;        
 
       default:
         console.log(`
@@ -94,7 +102,13 @@ Commands:
   commentme --unskim <file>
 `);
     }
+
   } catch (err) {
     console.error("❌", err.message);
+  } finally {
+    await disconnectDB();
+    process.exit(0);
   }
-})();
+}
+
+main();

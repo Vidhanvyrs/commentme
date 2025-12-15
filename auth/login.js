@@ -2,6 +2,7 @@ import readline from "readline";
 import bcrypt from "bcryptjs";
 import { User } from "../models/User.js";
 import { saveSession } from "../utils/session.js";
+import { promptPassword } from "../utils/passwordPrompt.js";
 
 export async function login() {
   const rl = readline.createInterface({
@@ -12,8 +13,9 @@ export async function login() {
   const ask = q => new Promise(res => rl.question(q, res));
 
   const username = await ask("Username: ");
-  const password = await ask("Password: ");
   rl.close();
+
+  const password = await promptPassword("Password: ");
 
   const user = await User.findOne({ username });
   if (!user) throw new Error("User not found");
@@ -23,4 +25,6 @@ export async function login() {
 
   saveSession(user._id);
   console.log("✔ Login successful");
+  console.log("✔ Process ran successful");
+
 }
