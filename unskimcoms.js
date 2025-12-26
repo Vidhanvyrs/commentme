@@ -53,7 +53,11 @@ export async function unskimComments(filePath, codebase = "default") {
 
   // Load cleaned file
   const code = fs.readFileSync(filePath, "utf8");
-  const lines = code.split("\n");
+  let lines = code.split("\n");
+
+  // Remove reference comments first (pattern: // #refer commentme --get line-X-Y)
+  const refCommentPattern = /^\s*\/\/\s*#refer\s+commentme\s+--get\s+line-\d+-\d+\s*$/;
+  lines = lines.filter(line => !refCommentPattern.test(line));
 
   // Prepare insertion entries (descending order)
   const entries = Object.entries(comments)

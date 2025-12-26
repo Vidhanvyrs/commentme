@@ -83,8 +83,23 @@ export async function removeCommentsFromFile(filePath, codebase = "default") {
     cleaned = cleaned.slice(0, c.start) + cleaned.slice(c.end);
   }
 
+  // Convert to lines for inserting reference comments
+  let lines = cleaned.split("\n");
+  
+  // Insert reference comments (ascending order by line number)
+  const sortedComments = [...comments].sort((a, b) => a.lineStart - b.lineStart);
+  
+  for (const c of sortedComments) {
+    const key = `${c.lineStart}-${c.lineEnd}`;
+    const refComment = `// #refer commentme --get line-${key}`;
+    // Insert at the line where the comment was (lineStart is 1-indexed, array is 0-indexed)
+    const insertIndex = c.lineStart - 1;
+    lines.splice(insertIndex, 0, refComment);
+  }
+
+
   // Write cleaned file back
-  fs.writeFileSync(filePath, cleaned, "utf8");
+  fs.writeFileSync(filePath, lines.join("\n"), "utf8");
 
   // 🔥 SAVE COMMENTS TO MONGODB
   const store = await CommentStore.findOneAndUpdate(
