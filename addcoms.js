@@ -36,17 +36,24 @@ export async function addComment(key, value, codebase = "default") {
   const userId = getCurrentUserId();
 
   const store = await CommentStore.findOneAndUpdate(
-    { userId, codebase },
-    { $setOnInsert: { userId, codebase } },
+    { userId },
+    { $setOnInsert: { userId } },
     { new: true, upsert: true }
   );
 
-  if (store.comments.has(key)) {
-    throw new Error(`Key ${key} already exists`);
+  // Find or create codebase entry
+  let codebaseEntry = store.comments.find(c => c.codebase === codebase);
+  
+  if (!codebaseEntry) {
+    codebaseEntry = {
+      codebase,
+      filecomment: new Map()
+    };
+    store.comments.push(codebaseEntry);
   }
 
-  store.comments.set(key, value.trim());
+  codebaseEntry.filecomment.set(key, value);
   await store.save();
 
-  console.log(`✔ Added comment for ${key}`);
+  console.log(`✔ Comment added for ${key}`);
 }

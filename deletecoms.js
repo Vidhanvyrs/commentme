@@ -33,14 +33,20 @@ import { getCurrentUserId } from "./utils/currentUser.js";
 export async function deleteComment(key, codebase = "default") {
   const userId = getCurrentUserId();
 
-  const store = await CommentStore.findOne({ userId, codebase });
+  const store = await CommentStore.findOne({ userId });
 
-  if (!store || !store.comments.has(key)) {
+  if (!store) {
+    throw new Error("No comments found");
+  }
+
+  const codebaseEntry = store.comments.find(c => c.codebase === codebase);
+
+  if (!codebaseEntry || !codebaseEntry.filecomment.has(key)) {
     throw new Error(`No comment found for key: ${key}`);
   }
 
-  store.comments.delete(key);
+  codebaseEntry.filecomment.delete(key);
   await store.save();
 
-  console.log(`✔ Deleted comment for ${key}`);
+  console.log(`✔ Comment deleted for ${key}`);
 }

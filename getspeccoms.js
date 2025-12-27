@@ -26,13 +26,19 @@ import { getCurrentUserId } from "./utils/currentUser.js";
 export async function getSpecificComment(key, silent = false, codebase = "default") {
   const userId = getCurrentUserId();
 
-  const store = await CommentStore.findOne({ userId, codebase });
+  const store = await CommentStore.findOne({ userId });
 
-  if (!store || !store.comments.has(key)) {
+  if (!store) {
     throw new Error(`No comment found for key: ${key}`);
   }
 
-  const value = store.comments.get(key);
+  const codebaseEntry = store.comments.find(c => c.codebase === codebase);
+
+  if (!codebaseEntry || !codebaseEntry.filecomment.has(key)) {
+    throw new Error(`No comment found for key: ${key}`);
+  }
+
+  const value = codebaseEntry.filecomment.get(key);
 
   if (!silent) {
     console.log(`✔ Comment for ${key}:`);

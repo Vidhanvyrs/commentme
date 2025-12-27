@@ -34,14 +34,20 @@ import { getCurrentUserId } from "./utils/currentUser.js";
 export async function editComment(key, value, codebase = "default") {
   const userId = getCurrentUserId();
 
-  const store = await CommentStore.findOne({ userId, codebase });
+  const store = await CommentStore.findOne({ userId });
 
-  if (!store || !store.comments.has(key)) {
+  if (!store) {
+    throw new Error("No comments found");
+  }
+
+  const codebaseEntry = store.comments.find(c => c.codebase === codebase);
+
+  if (!codebaseEntry || !codebaseEntry.filecomment.has(key)) {
     throw new Error(`No comment found for key: ${key}`);
   }
 
-  store.comments.set(key, value.trim());
+  codebaseEntry.filecomment.set(key, value);
   await store.save();
 
-  console.log(`✔ Updated comment for ${key}`);
+  console.log(`✔ Comment updated for ${key}`);
 }

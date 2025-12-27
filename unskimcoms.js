@@ -1,23 +1,48 @@
 import fs from "fs";
+import path from "path";
 import { CommentStore } from "./models/CommentStore.js";
 import { getCurrentUserId } from "./utils/currentUser.js";
 import { getCommentPattern, formatComment } from "./utils/commentPatterns.js";
 
-export async function unskimComments(filePath, codebase = "default") {
+export async function unskimComments(filePath, codebase = null) {
   if (!fs.existsSync(filePath)) {
     throw new Error(`File not found: ${filePath}`);
+  }
+
+  // Use filename as codebase if not provided
+  if (!codebase) {
+    codebase = path.basename(filePath);
   }
 
   const userId = getCurrentUserId();
 
   // Fetch comments from DB
-  const store = await CommentStore.findOne({ userId, codebase });
+  const store = await CommentStore.findOne({ userId });
 
-  if (!store || store.comments.size === 0) {
-    throw new Error("No comments found for this codebase");
+  if (!store) {
+    throw new Error("No comments found for this user");
   }
 
-  const comments = Object.fromEntries(store.comments);
+  // Find the specific codebase
+  const codebaseEntry = store.comments.find(c => c.codebase === codebase);
+
+  if (!codebaseEntry) {
+    throw new Error(`No comments found for codebase: ${codebase}`);
+  }
+
+  // Ensure filecomment is a Map
+  let filecommentMap;
+  if (codebaseEntry.filecomment instanceof Map) {
+    filecommentMap = codebaseEntry.filecomment;
+  } else {
+    filecommentMap = new Map(Object.entries(codebaseEntry.filecomment || {}));
+  }
+
+  if (filecommentMap.size === 0) {
+    throw new Error(`No comments found for codebase: ${codebase}`);
+  }
+
+  const comments = Object.fromEntries(filecommentMap);
 
   // Get comment pattern based on file extension
   const pattern = getCommentPattern(filePath);
@@ -55,5 +80,5 @@ export async function unskimComments(filePath, codebase = "default") {
   // Write restored file
   fs.writeFileSync(filePath, lines.join("\n"), "utf8");
 
-  console.log("✔ Comments successfully restored from database");
+  console.log(`✔ Comments successfully restored from database (codebase: ${codebase})`);
 }

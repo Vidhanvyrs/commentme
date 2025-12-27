@@ -16,12 +16,19 @@ import { getCurrentUserId } from "./utils/currentUser.js";
 export async function getAllComments(codebase = "default") {
   const userId = getCurrentUserId();
 
-  const store = await CommentStore.findOne({ userId, codebase });
+  const store = await CommentStore.findOne({ userId });
 
-  if (!store || store.comments.size === 0) {
+  if (!store) {
     console.log("{}");
     return;
   }
 
-  console.log(Object.fromEntries(store.comments));
+  const codebaseEntry = store.comments.find(c => c.codebase === codebase);
+
+  if (!codebaseEntry || codebaseEntry.filecomment.size === 0) {
+    console.log("{}");
+    return;
+  }
+
+  console.log(Object.fromEntries(codebaseEntry.filecomment));
 }
