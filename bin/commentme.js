@@ -125,6 +125,8 @@ import { unskimComments as unskim } from "../unskimcoms.js";
 import { connectDB, disconnectDB } from "../config/db.js";
 import { ensureAuth } from "../auth/authGuard.js";
 import { logout } from "../auth/logout.js";
+import dotenv from "dotenv";
+dotenv.config();
 
 function promptInput(defaultValue = "") {
   const rl = readline.createInterface({
@@ -145,6 +147,25 @@ async function main() {
   const command = args[0];
 
   try {
+    // Show help without connecting to DB or requiring auth
+    if (command === "--help" || command === "-h" || !command) {
+      console.log(`
+commentme CLI
+
+Commands:
+  commentme --get line-1-6      Get a specific comment by line range
+  commentme --get lines          Get all comments
+  commentme --add 1-6            Add a new comment for a line range
+  commentme --edit line-1-6      Edit an existing comment
+  commentme --delete line-1-6    Delete a comment
+  commentme --skim <file>        Redact comments from a file and store them
+  commentme --unskim <file>      Restore comments to a file
+  commentme --logout             Log out from your session
+  commentme --help               Show this help message
+`);
+      return;
+    }
+
     await connectDB();
 
     // 🔐 Skip auth ONLY for logout
@@ -224,7 +245,9 @@ Commands:
   } catch (err) {
     console.error("❌", err.message);
   } finally {
-    await disconnectDB();
+    if (command !== "--help" && command !== "-h" && command) {
+      await disconnectDB();
+    }
     process.exit(0);
   }
 }

@@ -1,9 +1,19 @@
 import mongoose from "mongoose";
 
 export async function connectDB() {
-  await mongoose.connect("mongodb://127.0.0.1:27017/commentme");
+  const mongoUri = process.env.MONGODB_URI;
+  
+  if (!mongoUri) {
+    throw new Error("MONGODB_URI environment variable is not set. Please create a .env file with your MongoDB connection string.");
+  }
+  
+  await mongoose.connect(mongoUri);
+  
+  console.log("✔ Connected to MongoDB");
 }
 
 export async function disconnectDB() {
   await mongoose.disconnect();
+  console.log("✔ Disconnected from MongoDB");
 }
+

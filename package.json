@@ -1,13 +1,39 @@
 {
-    "name": "commentme",
-    "version": "1.0.0",
-    "type": "module",
-    "bin": {
-        "commentme": "./bin/commentme.js"
-    },
-    "dependencies": {
-        "acorn": "^8.15.0",
-        "bcryptjs": "^3.0.3",
-        "mongoose": "^9.0.1"
-    }
+  "name": "commentme",
+  "version": "1.0.0",
+  "description": "A CLI tool to manage and store code comments in MongoDB",
+  "main": "bin/commentme.js",
+  "type": "module",
+  "bin": {
+    "commentme": "./bin/commentme.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "comments",
+    "cli",
+    "code-comments",
+    "mongodb",
+    "developer-tools"
+  ],
+  "author": "Vidhan Solanki vidhanvyrs@gmail.com",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/commentme-js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/commentme-js/issues"
+  },
+  "homepage": "https://github.com/yourusername/commentme-js#readme",
+  "dependencies": {
+    "acorn": "^8.15.0",
+    "bcryptjs": "^3.0.3",
+    "dotenv": "^17.2.3",
+    "mongoose": "^9.0.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
 }

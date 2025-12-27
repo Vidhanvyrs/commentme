@@ -54,11 +54,15 @@ export async function removeCommentsFromFile(filePath, codebase = "default") {
   const comments = [];
   const commentMap = {};
 
-  // Parse comments
+  // Parse comments (this will skip reference comments since they're not valid JS comments)
   acorn.parse(code, {
     ecmaVersion: 2020,
     locations: true,
     onComment: (isBlock, text, start, end, startLoc, endLoc) => {
+      // Skip reference comments
+      if (text.trim().startsWith("#refer commentme")) {
+        return;
+      }
       comments.push({
         start,
         end,
@@ -75,39 +79,28 @@ export async function removeCommentsFromFile(filePath, codebase = "default") {
     commentMap[key] = c.text.trim();
   }
 
-  // Remove comments from code (descending order)
+  // Replace comments with reference comments (descending order to preserve positions)
   comments.sort((a, b) => b.start - a.start);
 
-  let cleaned = code;
+  let result = code;
   for (const c of comments) {
-    cleaned = cleaned.slice(0, c.start) + cleaned.slice(c.end);
-  }
-
-  // Convert to lines for inserting reference comments
-  let lines = cleaned.split("\n");
-  
-  // Insert reference comments (ascending order by line number)
-  const sortedComments = [...comments].sort((a, b) => a.lineStart - b.lineStart);
-  
-  for (const c of sortedComments) {
     const key = `${c.lineStart}-${c.lineEnd}`;
     const refComment = `// #refer commentme --get line-${key}`;
-    // Insert at the line where the comment was (lineStart is 1-indexed, array is 0-indexed)
-    const insertIndex = c.lineStart - 1;
-    lines.splice(insertIndex, 0, refComment);
+    // REPLACE the comment with reference comment
+    result = result.slice(0, c.start) + refComment + result.slice(c.end);
   }
 
+  // Write file back
+  fs.writeFileSync(filePath, result, "utf8");
 
-  // Write cleaned file back
-  fs.writeFileSync(filePath, lines.join("\n"), "utf8");
-
-  // 🔥 SAVE COMMENTS TO MONGODB
+  // 🔥 SAVE/UPDATE COMMENTS TO MONGODB
   const store = await CommentStore.findOneAndUpdate(
     { userId, codebase },
     { $setOnInsert: { userId, codebase } },
     { new: true, upsert: true }
   );
 
+  // Update existing comments or add new ones
   for (const [key, value] of Object.entries(commentMap)) {
     store.comments.set(key, value);
   }
@@ -116,5 +109,5 @@ export async function removeCommentsFromFile(filePath, codebase = "default") {
 
   console.log("✔ File skimmed and comments stored in database");
 
-  return { cleaned, commentMap };
+  return { cleaned: result, commentMap };
 }

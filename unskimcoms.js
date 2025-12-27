@@ -51,31 +51,33 @@ export async function unskimComments(filePath, codebase = "default") {
 
   const comments = Object.fromEntries(store.comments);
 
-  // Load cleaned file
+  // Load file
   const code = fs.readFileSync(filePath, "utf8");
   let lines = code.split("\n");
 
-  // Remove reference comments first (pattern: // #refer commentme --get line-X-Y)
-  const refCommentPattern = /^\s*\/\/\s*#refer\s+commentme\s+--get\s+line-\d+-\d+\s*$/;
-  lines = lines.filter(line => !refCommentPattern.test(line));
-
-  // Prepare insertion entries (descending order)
-  const entries = Object.entries(comments)
-    .map(([key, text]) => {
-      const [startLine, endLine] = key.split("-").map(Number);
-      return { startLine, endLine, text };
-    })
-    .sort((a, b) => b.startLine - a.startLine);
-
-  // Reinsert comments
-  for (const { startLine, text } of entries) {
-    const commentBlock =
-      text.includes("\n")
-        ? `/* ${text} */`
-        : `// ${text}`;
-
-    const insertIndex = startLine - 1;
-    lines.splice(insertIndex, 0, commentBlock);
+  // Replace reference comments with actual comments
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    
+    // Match reference comment pattern: // #refer commentme --get line-X-Y
+    const refCommentMatch = line.match(/\/\/\s*#refer\s+commentme\s+--get\s+line-(\d+-\d+)\s*/);
+    
+    if (refCommentMatch) {
+      const key = refCommentMatch[1];
+      const commentText = comments[key];
+      
+      if (commentText) {
+        // Format comment properly
+        const commentBlock = commentText.includes("\n")
+          ? `/* ${commentText} */`
+          : `// ${commentText}`;
+        
+        // Replace the entire line with the comment
+        // Preserve any leading whitespace from the original line
+        const leadingWhitespace = line.match(/^\s*/)?.[0] || "";
+        lines[i] = leadingWhitespace + commentBlock;
+      }
+    }
   }
 
   // Write restored file
