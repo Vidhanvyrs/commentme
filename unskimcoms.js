@@ -1,39 +1,7 @@
-// import fs from "fs";
-
-// export function unskimComments(filePath) {
-//   if (!fs.existsSync("output.json")) {
-//     console.error("output.json not found. Run skimcoms.js first.");
-//     process.exit(1);
-//   }
-
-//   // Load cleaned file and saved comments
-//   const code = fs.readFileSync(filePath, "utf8");
-//   const lines = code.split("\n");
-
-//   const raw = fs.readFileSync("output.json", "utf8");
-//   const comments = JSON.parse(raw);
-
-//   // entries: [{ startLine, endLine, text }], sorted descending so indices stay valid
-//   const entries = Object.entries(comments)
-//     .map(([key, text]) => {
-//       const [startLine, endLine] = key.split("-").map(Number);
-//       return { startLine, endLine, text };
-//     })
-//     .sort((a, b) => b.startLine - a.startLine);
-
-//   for (const { startLine, text } of entries) {
-//     const commentBlock = text.includes("\n") ? `/* ${text} */` : `// ${text}`;
-//     const insertIndex = startLine - 1; // insert above original start line
-//     lines.splice(insertIndex, 0, commentBlock);
-//   }
-
-//   fs.writeFileSync(filePath, lines.join("\n"), "utf8");
-//   console.log("✔ Comments successfully restored into the file.");
-// }
-
 import fs from "fs";
 import { CommentStore } from "./models/CommentStore.js";
 import { getCurrentUserId } from "./utils/currentUser.js";
+import { getCommentPattern, formatComment } from "./utils/commentPatterns.js";
 
 export async function unskimComments(filePath, codebase = "default") {
   if (!fs.existsSync(filePath)) {
@@ -51,6 +19,9 @@ export async function unskimComments(filePath, codebase = "default") {
 
   const comments = Object.fromEntries(store.comments);
 
+  // Get comment pattern based on file extension
+  const pattern = getCommentPattern(filePath);
+
   // Load file
   const code = fs.readFileSync(filePath, "utf8");
   let lines = code.split("\n");
@@ -59,18 +30,19 @@ export async function unskimComments(filePath, codebase = "default") {
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     
-    // Match reference comment pattern: // #refer commentme --get line-X-Y
-    const refCommentMatch = line.match(/\/\/\s*#refer\s+commentme\s+--get\s+line-(\d+-\d+)\s*/);
+    // Match reference comment pattern (works for different comment styles)
+    const refCommentMatch = line.match(/(\/\/|#|--|;|<!--|%)\s*#refer\s+commentme\s+--get\s+line-(\d+-\d+)\s*(-->)?/);
     
     if (refCommentMatch) {
-      const key = refCommentMatch[1];
+      const key = refCommentMatch[2];
       const commentText = comments[key];
       
       if (commentText) {
-        // Format comment properly
-        const commentBlock = commentText.includes("\n")
-          ? `/* ${commentText} */`
-          : `// ${commentText}`;
+        // Determine if it was a block comment (has newlines)
+        const isBlock = commentText.includes("\n");
+        
+        // Format comment properly based on file type
+        const commentBlock = formatComment(commentText, pattern, isBlock);
         
         // Replace the entire line with the comment
         // Preserve any leading whitespace from the original line

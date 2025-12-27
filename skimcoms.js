@@ -42,6 +42,7 @@ import * as acorn from "acorn";
 import fs from "fs";
 import { CommentStore } from "./models/CommentStore.js";
 import { getCurrentUserId } from "./utils/currentUser.js";
+import { getCommentPattern, detectComments, formatReferenceComment } from "./utils/commentPatterns.js";
 
 export async function removeCommentsFromFile(filePath, codebase = "default") {
   if (!fs.existsSync(filePath)) {
@@ -51,27 +52,12 @@ export async function removeCommentsFromFile(filePath, codebase = "default") {
   const userId = getCurrentUserId();
   const code = fs.readFileSync(filePath, "utf8");
 
-  const comments = [];
+  // Get comment pattern based on file extension
+  const pattern = getCommentPattern(filePath);
+  
+  // Detect comments using appropriate pattern
+  const comments = detectComments(code, pattern);
   const commentMap = {};
-
-  // Parse comments (this will skip reference comments since they're not valid JS comments)
-  acorn.parse(code, {
-    ecmaVersion: 2020,
-    locations: true,
-    onComment: (isBlock, text, start, end, startLoc, endLoc) => {
-      // Skip reference comments
-      if (text.trim().startsWith("#refer commentme")) {
-        return;
-      }
-      comments.push({
-        start,
-        end,
-        text,
-        lineStart: startLoc.line,
-        lineEnd: endLoc.line
-      });
-    }
-  });
 
   // Build key-value map
   for (const c of comments) {
@@ -85,7 +71,7 @@ export async function removeCommentsFromFile(filePath, codebase = "default") {
   let result = code;
   for (const c of comments) {
     const key = `${c.lineStart}-${c.lineEnd}`;
-    const refComment = `// #refer commentme --get line-${key}`;
+    const refComment = formatReferenceComment(key, pattern);
     // REPLACE the comment with reference comment
     result = result.slice(0, c.start) + refComment + result.slice(c.end);
   }
