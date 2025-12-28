@@ -73,14 +73,49 @@ export function detectComments(code, pattern) {
   const comments = [];
   const lines = code.split("\n");
   
-  let inBlockComment = false;
-  let blockStart = null;
-  let blockText = [];
-  let blockStartLine = null;
+  let charOffset = 0;
+  let inBlockComment = false; // Add this
+  let blockStart = null; // Add this
+  let blockStartLine = null; // Add this
+  let blockText = []; // Add this
   
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     const lineNum = i + 1;
+    const lineStartChar = charOffset;
+    
+    // Handle line comments (including inline)
+    if (pattern.line) {
+      const commentMarker = pattern.line;
+      const commentIndex = line.indexOf(commentMarker);
+      
+      if (commentIndex !== -1) {
+        // Check if it's in a string (simple check)
+        const beforeComment = line.substring(0, commentIndex);
+        const inString = isInString(beforeComment);
+        
+        if (!inString) {
+          const commentText = line.substring(commentIndex + commentMarker.length).trim();
+          
+          // Skip reference comments
+          if (!commentText.startsWith("#refer commentme")) {
+            const commentStartChar = lineStartChar + commentIndex;
+            const commentEndChar = lineStartChar + line.length;
+            const isInline = commentIndex > 0 && line.substring(0, commentIndex).trim().length > 0;
+            
+            comments.push({
+              start: commentStartChar,
+              end: commentEndChar,
+              text: commentText,
+              lineStart: lineNum,
+              lineEnd: lineNum,
+              isBlock: false,
+              isInline: isInline
+            });
+          }
+        }
+      }
+    }
     
     // Handle block comments
     if (pattern.block) {
@@ -157,27 +192,7 @@ export function detectComments(code, pattern) {
       }
     }
     
-    // Handle line comments
-    if (pattern.line && !inBlockComment) {
-      const lineCommentIndex = line.indexOf(pattern.line);
-      if (lineCommentIndex !== -1) {
-        // Skip if it's a reference comment
-        const afterComment = line.substring(lineCommentIndex + pattern.line.length).trim();
-        if (afterComment.startsWith("#refer commentme")) {
-          continue;
-        }
-        
-        const commentText = line.substring(lineCommentIndex + pattern.line.length).trim();
-        comments.push({
-          start: getCharPosition(lines, lineNum, lineCommentIndex),
-          end: getCharPosition(lines, lineNum, line.length),
-          text: commentText,
-          lineStart: lineNum,
-          lineEnd: lineNum,
-          isBlock: false
-        });
-      }
-    }
+    charOffset += line.length + 1;
   }
   
   return comments;
@@ -189,6 +204,19 @@ function getCharPosition(lines, lineNum, column) {
     pos += lines[i].length + 1; // +1 for newline
   }
   return pos + column;
+}
+
+function isInString(text) {
+  // Simple check: count quotes (not perfect but works for most cases)
+  let inSingle = false;
+  let inDouble = false;
+  
+  for (let i = 0; i < text.length; i++) {
+    if (text[i] === "'" && !inDouble) inSingle = !inSingle;
+    if (text[i] === '"' && !inSingle) inDouble = !inDouble;
+  }
+  
+  return inSingle || inDouble;
 }
 
 export function formatComment(text, pattern, isBlock) {

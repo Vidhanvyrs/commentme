@@ -69,10 +69,17 @@ export async function unskimComments(filePath, codebase = null) {
         // Format comment properly based on file type
         const commentBlock = formatComment(commentText, pattern, isBlock);
         
-        // Replace the entire line with the comment
-        // Preserve any leading whitespace from the original line
+        // Check if reference comment is inline (has code before it)
         const leadingWhitespace = line.match(/^\s*/)?.[0] || "";
-        lines[i] = leadingWhitespace + commentBlock;
+        const codeBeforeComment = line.substring(0, refCommentMatch.index).trimEnd();
+        
+        if (codeBeforeComment && !codeBeforeComment.startsWith("//") && !codeBeforeComment.startsWith("#")) {
+          // Inline comment - preserve code before
+          lines[i] = codeBeforeComment + " " + commentBlock;
+        } else {
+          // Full line comment
+          lines[i] = leadingWhitespace + commentBlock;
+        }
       }
     }
   }

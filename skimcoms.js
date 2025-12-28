@@ -104,8 +104,15 @@ export async function removeCommentsFromFile(filePath, codebase = null) {
   for (const c of comments) {
     const key = `${c.lineStart}-${c.lineEnd}`;
     const refComment = formatReferenceComment(key, pattern);
-    // REPLACE the comment with reference comment
-    result = result.slice(0, c.start) + refComment + result.slice(c.end);
+    
+    if (c.isInline) {
+      // For inline comments: replace comment with reference, preserve code
+      // The slice already preserves code before (c.start is at comment start)
+      result = result.slice(0, c.start) + refComment + result.slice(c.end);
+    } else {
+      // Full line comment: replace entire comment
+      result = result.slice(0, c.start) + refComment + result.slice(c.end);
+    }
   }
 
   // Write file back

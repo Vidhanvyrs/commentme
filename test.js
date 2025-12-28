@@ -11,5 +11,5 @@ function foo() {
 // fsdl;afl;asl;gtwopjugpajg;ajlw;ejlr;jel;kal;d.dsfgagjg
 
 // one more test comment lol
-console.log("bar");
+console.log("bar"); // another commment here lol dsljfsdl
 }
