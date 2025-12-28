@@ -70,7 +70,7 @@ export async function removeCommentsFromFile(filePath, codebase = null) {
       locations: true,
       onComment: (isBlock, text, start, end, startLoc, endLoc) => {
         // Skip reference comments
-        if (text.trim().startsWith("#refer commentme")) {
+        if (text.trim().startsWith("#ref")) {
           return;
         }
         comments.push({

@@ -230,8 +230,8 @@ export function formatComment(text, pattern, isBlock) {
 
 export function formatReferenceComment(key, pattern) {
   if (pattern.line) {
-    return `${pattern.line} #refer commentme --get line-${key}`;
+    return `${pattern.line} #ref ${key}`;
   }
   // For block-only languages, use line comment style if available, otherwise use block
-  return `/* #refer commentme --get line-${key} */`;
+  return `/* #ref ${key} */`;
 }

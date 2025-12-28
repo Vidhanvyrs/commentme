@@ -56,7 +56,7 @@ export async function unskimComments(filePath, codebase = null) {
     const line = lines[i];
     
     // Match reference comment pattern (works for different comment styles)
-    const refCommentMatch = line.match(/(\/\/|#|--|;|<!--|%)\s*#refer\s+commentme\s+--get\s+line-(\d+-\d+)\s*(-->)?/);
+    const refCommentMatch = line.match(/(\/\/|#|--|;|<!--|%)\s*#ref\s+(\d+-\d+)\s*(-->)?/);
     
     if (refCommentMatch) {
       const key = refCommentMatch[2];
