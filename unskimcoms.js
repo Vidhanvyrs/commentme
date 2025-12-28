@@ -80,6 +80,17 @@ export async function unskimComments(filePath, codebase = null) {
           // Full line comment
           lines[i] = leadingWhitespace + commentBlock;
         }
+      } else {
+        // Key not found in DB - remove the reference comment
+        const codeBeforeComment = line.substring(0, refCommentMatch.index).trimEnd();
+        
+        if (codeBeforeComment && !codeBeforeComment.startsWith("//") && !codeBeforeComment.startsWith("#")) {
+          // Inline comment - remove comment part, keep code
+          lines[i] = codeBeforeComment;
+        } else {
+          // Full line comment - set to empty to preserve line numbers
+          lines[i] = "";
+        }
       }
     }
   }

@@ -11,9 +11,11 @@
 //   console.log(comments);
 // }
 import { CommentStore } from "./models/CommentStore.js";
+import path from "path";
 import { getCurrentUserId } from "./utils/currentUser.js";
 
-export async function getAllComments(codebase = "default") {
+export async function getAllComments(filePath = null) {
+  const codebase = filePath ? path.basename(filePath) : "default";
   const userId = getCurrentUserId();
 
   const store = await CommentStore.findOne({ userId });
@@ -23,12 +25,13 @@ export async function getAllComments(codebase = "default") {
     return;
   }
 
-  const codebaseEntry = store.comments.find(c => c.codebase === codebase);
+  const codebaseIndex= store.comments.findIndex(c => c.codebase === codebase);
 
-  if (!codebaseEntry || codebaseEntry.filecomment.size === 0) {
+  if (codebaseIndex === -1 || !store.comments[codebaseIndex].filecomment) {
     console.log("{}");
     return;
   }
+  const codebaseEntry = store.comments[codebaseIndex];
 
   console.log(Object.fromEntries(codebaseEntry.filecomment));
 }

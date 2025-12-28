@@ -28,9 +28,11 @@
 
 
 import { CommentStore } from "./models/CommentStore.js";
+import path from "path";
 import { getCurrentUserId } from "./utils/currentUser.js";
 
-export async function deleteComment(key, codebase = "default") {
+export async function deleteComment(key, filePath = null) {
+  const codebase = filePath ? path.basename(filePath) : "default";
   const userId = getCurrentUserId();
 
   const store = await CommentStore.findOne({ userId });
@@ -38,13 +40,14 @@ export async function deleteComment(key, codebase = "default") {
   if (!store) {
     throw new Error("No comments found");
   }
+  
+  const codebaseIndex = store.comments.findIndex(c => c.codebase === codebase);
 
-  const codebaseEntry = store.comments.find(c => c.codebase === codebase);
-
-  if (!codebaseEntry || !codebaseEntry.filecomment.has(key)) {
+  if (codebaseIndex === -1 || !store.comments[codebaseIndex].filecomment) {
     throw new Error(`No comment found for key: ${key}`);
   }
 
+  const codebaseEntry = store.comments[codebaseIndex];
   codebaseEntry.filecomment.delete(key);
   await store.save();
 

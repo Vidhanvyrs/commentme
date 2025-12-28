@@ -29,9 +29,11 @@
 
 
 import { CommentStore } from "./models/CommentStore.js";
+import path from "path";
 import { getCurrentUserId } from "./utils/currentUser.js";
 
-export async function editComment(key, value, codebase = "default") {
+export async function editComment(key, value, filePath = null) {
+  const codebase = filePath ? path.basename(filePath) : "default";
   const userId = getCurrentUserId();
 
   const store = await CommentStore.findOne({ userId });
@@ -40,12 +42,12 @@ export async function editComment(key, value, codebase = "default") {
     throw new Error("No comments found");
   }
 
-  const codebaseEntry = store.comments.find(c => c.codebase === codebase);
+  const codebaseIndex = store.comments.findIndex(c => c.codebase === codebase);
 
-  if (!codebaseEntry || !codebaseEntry.filecomment.has(key)) {
+  if (codebaseIndex === -1 || !store.comments[codebaseIndex].filecomment.has(key)) {
     throw new Error(`No comment found for key: ${key}`);
   }
-
+  const codebaseEntry = store.comments[codebaseIndex];
   codebaseEntry.filecomment.set(key, value);
   await store.save();
 

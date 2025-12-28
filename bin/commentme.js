@@ -117,7 +117,6 @@
 import readline from "readline";
 import { getAllComments } from "../getcoms.js";
 import { getSpecificComment } from "../getspeccoms.js";
-import { addComment } from "../addcoms.js";
 import { editComment } from "../editcoms.js";
 import { deleteComment } from "../deletecoms.js";
 import { removeCommentsFromFile as skim } from "../skimcoms.js";
@@ -153,11 +152,10 @@ async function main() {
 commentme CLI
 
 Commands:
-  commentme --get line-1-6      Get a specific comment by line range
-  commentme --get lines          Get all comments
-  commentme --add 1-6            Add a new comment for a line range
-  commentme --edit line-1-6      Edit an existing comment
-  commentme --delete line-1-6    Delete a comment
+  commentme --get line-7-7 <file>      Get a specific comment by line range
+  commentme --get lines <file>         Get all comments
+  commentme --edit line-7-7 <file>      Edit an existing comment
+  commentme --delete line-7-7 <file>    Delete a comment
   commentme --skim <file>        Redact comments from a file and store them
   commentme --unskim <file>      Restore comments to a file
   commentme --logout             Log out from your session
@@ -176,39 +174,31 @@ Commands:
     switch (command) {
 
       case "--get":
-        if (args[1] === "lines") {
-          await getAllComments();
+        if (args[1] === "lines" && args[2]) {
+          await getAllComments(args[2]);
         } else {
           const key = args[1]?.replace("line-", "");
           if (!key) throw new Error("Usage: commentme --get line-1-6");
-          await getSpecificComment(key);
+          await getSpecificComment(key, false, args[2]);
         }
         break;
 
-      case "--add": {
-        const key = args[1];
-        if (!key) throw new Error("Usage: commentme --add 1-6");
-        console.log("Enter comment:");
-        const text = await promptInput();
-        await addComment(key, text);
-        break;
-      }
 
       case "--edit": {
         const key = args[1]?.replace("line-", "");
         if (!key) throw new Error("Usage: commentme --edit line-1-6");
 
-        const existing = await getSpecificComment(key, true);
+        const existing = await getSpecificComment(key, true, args[2]);
         console.log("Edit comment:");
         const updated = await promptInput(existing);
-        await editComment(key, updated);
+        await editComment(key, updated, args[2]);
         break;
       }
 
       case "--delete": {
         const key = args[1]?.replace("line-", "");
         if (!key) throw new Error("Usage: commentme --delete line-1-6");
-        await deleteComment(key);
+        await deleteComment(key, args[2]);
         break;
       }
 
@@ -232,8 +222,7 @@ commentme CLI
 
 Commands:
   commentme --get line-1-6
-  commentme --get lines
-  commentme --add 1-6
+  commentme --get lines <file>
   commentme --edit line-1-6
   commentme --delete line-1-6
   commentme --skim <file>

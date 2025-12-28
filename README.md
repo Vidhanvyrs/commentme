@@ -4,7 +4,9 @@ A CLI tool to manage and store cluttered-code comments and give the codebase a c
 
 ## Installation
 
-npm install -g commentme## Usage
+npm install -g commentme
+
+## Usage
 
 # Show help
 commentme --help
@@ -13,16 +15,14 @@ commentme --help
 commentme --get lines
 
 # Get a specific comment
-commentme --get line-1-6
+commentme --get line-7-7 <file>
 
-# Add a comment
-commentme --add 1-6
 
 # Edit a comment
-commentme --edit line-1-6
+commentme --edit line-7-7 <file>
 
 # Delete a comment
-commentme --delete line-1-6
+commentme --delete line-7-7 <file>
 
 # Redact comments from a file 
 commentme --skim <file>
@@ -31,13 +31,16 @@ commentme --skim <file>
 commentme --unskim <file>
 
 # Logout
-commentme --logout## Features
+commentme --logout
 
-- Store code comments in MongoDB
+## Features
+
+- Clutter-free and smooth codebase
 - Redact comments from files while keeping references
-- Restore comments back to files
+- Restore comments back to files whenever required
 - User authentication and session management
 - Per-codebase comment organization
+- Dedicated website for more UI friendly edits on comments
 
 ## Requirements
 
