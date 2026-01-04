@@ -1,0 +1,55 @@
+// import fs from "fs";
+
+// export function deleteComment(key) {
+//   // Check that output.json exists
+//   if (!fs.existsSync("output.json")) {
+//     console.error("❌ output.json not found. Run skimcoms.js first.");
+//     process.exit(1);
+//   }
+
+//   // Load and parse JSON
+//   const raw = fs.readFileSync("output.json", "utf8");
+//   const comments = JSON.parse(raw);
+
+//   // Check if this key exists
+//   if (!comments[key]) {
+//     console.error(`❌ No comment found for key: ${key}`);
+//     process.exit(1);
+//   }
+
+//   // Delete the entry
+//   delete comments[key];
+
+//   // Save updated JSON back to file
+//   fs.writeFileSync("output.json", JSON.stringify(comments, null, 2));
+
+//   console.log(`✔ Comment for key ${key} has been deleted.`);
+// }
+
+
+import { CommentStore } from "./models/CommentStore.js";
+import path from "path";
+import { getCurrentUserId } from "./utils/currentUser.js";
+
+export async function deleteComment(key, filePath = null) {
+  const codebase = filePath ? path.basename(filePath) : "default";
+  const userId = getCurrentUserId();
+
+  const store = await CommentStore.findOne({ userId });
+
+  if (!store) {
+    throw new Error("No comments found");
+  }
+  
+  const codebaseIndex = store.comments.findIndex(c => c.codebase === codebase);
+
+  if (codebaseIndex === -1 || !store.comments[codebaseIndex].filecomment) {
+    throw new Error(`No comment found for key: ${key}`);
+  }
+
+  const codebaseEntry = store.comments[codebaseIndex];
+  codebaseEntry.filecomment.delete(key);
+  await store.save();
+
+  console.log(`✔ Comment deleted for ${key}`);
+}
