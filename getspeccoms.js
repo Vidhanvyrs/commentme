@@ -20,14 +20,62 @@
 //   return comments[key]; // IMPORTANT for edit flow
 // }
 
-import { CommentStore } from "./models/CommentStore.js";
+// import { CommentStore } from "./models/CommentStore.js";
 import path from "path";
 import { getCurrentUserId } from "./utils/currentUser.js";
+import { getSession } from "./utils/session.js";
 
 export async function getSpecificComment(key, silent = false, filePath = null) {
   const codebase = filePath ? path.basename(filePath) : "default";
-  const userId = getCurrentUserId();
 
+  // Check authentication
+  try {
+    getCurrentUserId();
+  } catch (e) {
+    if (!silent) console.error(e.message);
+    throw e;
+  }
+
+  const session = getSession();
+  const token = session ? session.token : null;
+
+  try {
+    const response = await fetch(`http://localhost:8000/comments/${encodeURIComponent(key)}?codebase=${encodeURIComponent(codebase)}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": token ? `Bearer ${token}` : ""
+      }
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      // Handle error, throw regular error to match previous behavior for catch blocks up the chain
+      throw new Error(data.message || `No comment found for key: ${key}`);
+    }
+
+    const value = data.comment; // Backend returns { key, comment }
+
+    if (!silent) {
+      console.log(`✔ Comment for ${key}:`);
+      console.log(value);
+    }
+
+    return value;
+
+  } catch (error) {
+    if (error.code === 'ECONNREFUSED') {
+      if (!silent) console.error("Error: Could not connect to the backend server. Is it running on port 8000?");
+      throw new Error("Connection failed");
+    } else {
+      // Re-throw so caller can handle "No comment found" etc.
+      throw error;
+    }
+  }
+
+  /*
+  const userId = getCurrentUserId();
   const store = await CommentStore.findOne({ userId });
 
   if (!store) {
@@ -48,4 +96,5 @@ export async function getSpecificComment(key, silent = false, filePath = null) {
   }
 
   return value;
+  */
 }

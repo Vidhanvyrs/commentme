@@ -41,7 +41,8 @@
 import * as acorn from "acorn";
 import fs from "fs";
 import path from "path";
-import { CommentStore } from "./models/CommentStore.js";
+// import { CommentStore } from "./models/CommentStore.js";
+import { getSession } from "./utils/session.js";
 import { getCurrentUserId } from "./utils/currentUser.js";
 import { getCommentPattern, detectComments, formatReferenceComment } from "./utils/commentPatterns.js";
 
@@ -55,7 +56,14 @@ export async function removeCommentsFromFile(filePath, codebase = null) {
     codebase = path.basename(filePath);
   }
 
-  const userId = getCurrentUserId();
+  // Check authentication
+  try {
+    getCurrentUserId();
+  } catch (e) {
+    console.error(e.message);
+    return;
+  }
+
   const code = fs.readFileSync(filePath, "utf8");
 
   const comments = [];
@@ -100,11 +108,11 @@ export async function removeCommentsFromFile(filePath, codebase = null) {
 
   let result = code;
   const pattern = getCommentPattern(filePath);
-  
+
   for (const c of comments) {
     const key = `${c.lineStart}-${c.lineEnd}`;
     const refComment = formatReferenceComment(key, pattern);
-    
+
     if (c.isInline) {
       // For inline comments: replace comment with reference, preserve code
       // The slice already preserves code before (c.start is at comment start)
@@ -117,6 +125,38 @@ export async function removeCommentsFromFile(filePath, codebase = null) {
 
   // Write file back
   fs.writeFileSync(filePath, result, "utf8");
+
+  const session = getSession();
+  const token = session ? session.token : null;
+
+  try {
+    const response = await fetch(`http://localhost:8000/comments/upload`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": token ? `Bearer ${token}` : ""
+      },
+      body: JSON.stringify({ codebase: codebase, comments: commentMap })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || `Failed to upload comments for codebase: ${codebase}`);
+    }
+
+    console.log(`✔ File skimmed and comments stored in database (codebase: ${codebase})`);
+
+  } catch (error) {
+    if (error.code === 'ECONNREFUSED') {
+      console.error("Error: Could not connect to the backend server. Is it running on port 8000?");
+    } else {
+      console.error("Error:", error.message);
+    }
+  }
+
+  /*
+  const userId = getCurrentUserId();
 
   // 🔥 SAVE/UPDATE COMMENTS TO MONGODB
   let store = await CommentStore.findOne({ userId });
@@ -157,6 +197,7 @@ export async function removeCommentsFromFile(filePath, codebase = null) {
   await store.save();
 
   console.log(`✔ File skimmed and comments stored in database (codebase: ${codebase})`);
+  */
 
   return { cleaned: result, commentMap };
 }

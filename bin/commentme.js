@@ -110,10 +110,10 @@ commentme CLI
 Commands:
   commentme --login
   commentme --signup
-  commentme --get line-1-6
+  commentme --get line-7-7 <file>
   commentme --get lines <file>
-  commentme --edit line-1-6
-  commentme --delete line-1-6
+  commentme --edit line-7-7 <file>
+  commentme --delete line-7-7 <file>
   commentme --skim <file>
   commentme --unskim <file>
   commentme --logout

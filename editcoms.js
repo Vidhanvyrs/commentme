@@ -28,12 +28,52 @@
 // }
 
 
-import { CommentStore } from "./models/CommentStore.js";
+// import { CommentStore } from "./models/CommentStore.js";
 import path from "path";
 import { getCurrentUserId } from "./utils/currentUser.js";
+import { getSession } from "./utils/session.js";
 
 export async function editComment(key, value, filePath = null) {
   const codebase = filePath ? path.basename(filePath) : "default";
+
+  // Check authentication
+  try {
+    getCurrentUserId();
+  } catch (e) {
+    console.error(e.message);
+    return;
+  }
+
+  const session = getSession();
+  const token = session ? session.token : null;
+
+  try {
+    const response = await fetch(`http://localhost:8000/comments/${encodeURIComponent(key)}?codebase=${encodeURIComponent(codebase)}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": token ? `Bearer ${token}` : ""
+      },
+      body: JSON.stringify({ value })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || `Failed to update comment for key: ${key}`);
+    }
+
+    console.log(`✔ Comment updated for ${key}`);
+
+  } catch (error) {
+    if (error.code === 'ECONNREFUSED') {
+      console.error("Error: Could not connect to the backend server. Is it running on port 8000?");
+    } else {
+      console.error("Error:", error.message);
+    }
+  }
+
+  /*
   const userId = getCurrentUserId();
 
   const store = await CommentStore.findOne({ userId });
@@ -52,4 +92,5 @@ export async function editComment(key, value, filePath = null) {
   await store.save();
 
   console.log(`✔ Comment updated for ${key}`);
+  */
 }

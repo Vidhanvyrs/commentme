@@ -4,8 +4,8 @@ import os from "os";
 
 const SESSION_PATH = path.join(os.homedir(), ".commentme-session.json");
 
-export function saveSession(userId) {
-  fs.writeFileSync(SESSION_PATH, JSON.stringify({ userId }));
+export function saveSession(sessionData) {
+  fs.writeFileSync(SESSION_PATH, JSON.stringify(sessionData));
 }
 
 export function getSession() {

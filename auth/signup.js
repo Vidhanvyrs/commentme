@@ -1,8 +1,9 @@
 import readline from "readline";
-import bcrypt from "bcryptjs";
-import { User } from "../models/User.js";
+// import bcrypt from "bcryptjs";
+// import { User } from "../models/User.js";
 import { saveSession } from "../utils/session.js";
 import { promptPassword } from "../utils/passwordPrompt.js";
+
 //signup function
 export async function signup() {
   const rl = readline.createInterface({
@@ -14,23 +15,52 @@ export async function signup() {
 
   const username = await ask("Username: ");
   const email = await ask("Email: ");
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     console.log("Invalid email address");
+    rl.close();
     return;
   }
-  const existinguser = await User.findOne({ email });
-  if (existinguser) {
-    console.log("User already exists, Try logging in");
-    return;
-  }
+
+  // const existinguser = await User.findOne({ email });
+  // if (existinguser) {
+  //   console.log("User already exists, Try logging in");
+  //   rl.close(); 
+  //   return;
+  // }
   rl.close();
 
   const password = await promptPassword("Password: ");
 
-  const hashed = await bcrypt.hash(password, 10);
-  const user = await User.create({ username, email, password: hashed });
+  try {
+    const response = await fetch("http://localhost:8000/signup", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ username, email, password }),
+    });
 
-  saveSession(user._id);
-  console.log("✔ Signup successful");
-  console.log("✔ Process ran successful");
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Signup failed");
+    }
+
+    saveSession(data);
+    console.log("✔ Signup successful");
+    console.log("✔ Process ran successful");
+  } catch (error) {
+    if (error.code === 'ECONNREFUSED') {
+      console.error("Error: Could not connect to the backend server. Is it running on port 8000?");
+    } else {
+      console.error("Error:", error.message);
+    }
+  }
+
+  // const hashed = await bcrypt.hash(password, 10);
+  // const user = await User.create({ username, email, password: hashed });
+
+  // saveSession(user._id);
+  // console.log("✔ Signup successful");
+  // console.log("✔ Process ran successful");
 }

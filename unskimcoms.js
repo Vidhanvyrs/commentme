@@ -1,7 +1,8 @@
 import fs from "fs";
 import path from "path";
-import { CommentStore } from "./models/CommentStore.js";
+// import { CommentStore } from "./models/CommentStore.js";
 import { getCurrentUserId } from "./utils/currentUser.js";
+import { getSession } from "./utils/session.js";
 import { getCommentPattern, formatComment } from "./utils/commentPatterns.js";
 
 export async function unskimComments(filePath, codebase = null) {
@@ -14,6 +15,50 @@ export async function unskimComments(filePath, codebase = null) {
     codebase = path.basename(filePath);
   }
 
+  // Check authentication
+  try {
+    getCurrentUserId();
+  } catch (e) {
+    console.error(e.message);
+    return;
+  }
+
+  const session = getSession();
+  const token = session ? session.token : null;
+
+  let comments = {};
+
+  try {
+    const response = await fetch(`http://localhost:8000/comments?codebase=${encodeURIComponent(codebase)}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": token ? `Bearer ${token}` : ""
+      }
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        throw new Error(`No comments found for codebase: ${codebase}`);
+      }
+      throw new Error(data.message || `Failed to fetch comments for codebase: ${codebase}`);
+    }
+
+    comments = data;
+
+  } catch (error) {
+    if (error.code === 'ECONNREFUSED') {
+      console.error("Error: Could not connect to the backend server. Is it running on port 8000?");
+      return;
+    } else {
+      throw error;
+    }
+  }
+
+
+  /*
   const userId = getCurrentUserId();
 
   // Fetch comments from DB
@@ -43,6 +88,7 @@ export async function unskimComments(filePath, codebase = null) {
   }
 
   const comments = Object.fromEntries(filecommentMap);
+  */
 
   // Get comment pattern based on file extension
   const pattern = getCommentPattern(filePath);
@@ -54,25 +100,25 @@ export async function unskimComments(filePath, codebase = null) {
   // Replace reference comments with actual comments
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    
+
     // Match reference comment pattern (works for different comment styles)
     const refCommentMatch = line.match(/(\/\/|#|--|;|<!--|%)\s*#ref\s+(\d+-\d+)\s*(-->)?/);
-    
+
     if (refCommentMatch) {
       const key = refCommentMatch[2];
       const commentText = comments[key];
-      
+
       if (commentText) {
         // Determine if it was a block comment (has newlines)
         const isBlock = commentText.includes("\n");
-        
+
         // Format comment properly based on file type
         const commentBlock = formatComment(commentText, pattern, isBlock);
-        
+
         // Check if reference comment is inline (has code before it)
         const leadingWhitespace = line.match(/^\s*/)?.[0] || "";
         const codeBeforeComment = line.substring(0, refCommentMatch.index).trimEnd();
-        
+
         if (codeBeforeComment && !codeBeforeComment.startsWith("//") && !codeBeforeComment.startsWith("#")) {
           // Inline comment - preserve code before
           lines[i] = codeBeforeComment + " " + commentBlock;
@@ -83,7 +129,7 @@ export async function unskimComments(filePath, codebase = null) {
       } else {
         // Key not found in DB - remove the reference comment
         const codeBeforeComment = line.substring(0, refCommentMatch.index).trimEnd();
-        
+
         if (codeBeforeComment && !codeBeforeComment.startsWith("//") && !codeBeforeComment.startsWith("#")) {
           // Inline comment - remove comment part, keep code
           lines[i] = codeBeforeComment;
