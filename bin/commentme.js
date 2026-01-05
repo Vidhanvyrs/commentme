@@ -8,7 +8,7 @@ import { editComment } from "../editcoms.js";
 import { deleteComment } from "../deletecoms.js";
 import { removeCommentsFromFile as skim } from "../skimcoms.js";
 import { unskimComments as unskim } from "../unskimcoms.js";
-import { connectDB, disconnectDB } from "../config/db.js";
+// import { connectDB, disconnectDB } from "../config/db.js";
 import { ensureAuth } from "../auth/authGuard.js";
 import { logout } from "../auth/logout.js";
 import dotenv from "dotenv";
@@ -51,7 +51,9 @@ Commands:
       return;
     }
 
+    /*
     await connectDB();
+    */
 
     // 🔐 Skip auth ONLY for logout
     if (command !== "--logout") {
@@ -123,9 +125,11 @@ Commands:
   } catch (err) {
     console.error("❌", err.message);
   } finally {
+    /*
     if (command !== "--help" && command !== "-h" && command) {
       await disconnectDB();
     }
+    */
     process.exit(0);
   }
 }
