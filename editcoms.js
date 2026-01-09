@@ -48,7 +48,7 @@ export async function editComment(key, value, filePath = null) {
   const token = session ? session.token : null;
 
   try {
-    const response = await fetch(`http://localhost:8000/comments/${encodeURIComponent(key)}?codebase=${encodeURIComponent(codebase)}`, {
+    const response = await fetch(`http://localhost:8080/comments/${encodeURIComponent(key)}?codebase=${encodeURIComponent(codebase)}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -67,7 +67,7 @@ export async function editComment(key, value, filePath = null) {
 
   } catch (error) {
     if (error.code === 'ECONNREFUSED') {
-      console.error("Error: Could not connect to the backend server. Is it running on port 8000?");
+      console.error("Error: Could not connect to the backend server. Is it running on port 8080?");
     } else {
       console.error("Error:", error.message);
     }

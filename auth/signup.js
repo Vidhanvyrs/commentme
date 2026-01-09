@@ -32,7 +32,7 @@ export async function signup() {
   const password = await promptPassword("Password: ");
 
   try {
-    const response = await fetch("http://localhost:8000/signup", {
+    const response = await fetch("http://localhost:8080/signup", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -51,7 +51,7 @@ export async function signup() {
     console.log("✔ Process ran successful");
   } catch (error) {
     if (error.code === 'ECONNREFUSED') {
-      console.error("Error: Could not connect to the backend server. Is it running on port 8000?");
+      console.error("Error: Could not connect to the backend server. Is it running on port 8080?");
     } else {
       console.error("Error:", error.message);
     }

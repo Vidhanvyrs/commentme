@@ -29,7 +29,7 @@ export async function unskimComments(filePath, codebase = null) {
   let comments = {};
 
   try {
-    const response = await fetch(`http://localhost:8000/comments?codebase=${encodeURIComponent(codebase)}`, {
+    const response = await fetch(`http://localhost:8080/comments?codebase=${encodeURIComponent(codebase)}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -50,7 +50,7 @@ export async function unskimComments(filePath, codebase = null) {
 
   } catch (error) {
     if (error.code === 'ECONNREFUSED') {
-      console.error("Error: Could not connect to the backend server. Is it running on port 8000?");
+      console.error("Error: Could not connect to the backend server. Is it running on port 8080?");
       return;
     } else {
       throw error;

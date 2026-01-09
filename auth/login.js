@@ -51,7 +51,7 @@ async function resetPassword() {
   */
 
   try {
-    const response = await fetch("http://localhost:8000/forgot-password", {
+    const response = await fetch("http://localhost:8080/forgot-password", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -69,7 +69,7 @@ async function resetPassword() {
     console.log("✔ You can now login with your new password");
   } catch (error) {
     if (error.code === 'ECONNREFUSED') {
-      console.error("Error: Could not connect to the backend server. Is it running on port 8000?");
+      console.error("Error: Could not connect to the backend server. Is it running on port 8080?");
       throw new Error("Connection Refused");
     } else {
       throw error;
@@ -127,7 +127,7 @@ export async function login() {
   */
 
   try {
-    const response = await fetch("http://localhost:8000/login", {
+    const response = await fetch("http://localhost:8080/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -141,12 +141,15 @@ export async function login() {
       throw new Error(data.message || "Login failed");
     }
 
-    saveSession(data);
+    saveSession({
+      ...data,
+      token: data.accessToken
+    });
     console.log("✔ Login successful");
     console.log("✔ Process ran successful");
   } catch (error) {
     if (error.code === 'ECONNREFUSED') {
-      console.error("Error: Could not connect to the backend server. Is it running on port 8000?");
+      console.error("Error: Could not connect to the backend server. Is it running on port 8080?");
       throw new Error("Connection Refused");
     } else {
       throw error;

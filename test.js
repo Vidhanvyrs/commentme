@@ -2,14 +2,14 @@ function foo() {
 
 
 
-// #ref 5-5
+    // this is a comment which was added while testing ref thing in skim functionality
 
 
-// #ref 8-8
 
 
-// #ref 11-11
-// #ref 12-12
-// #ref 13-13
-console.log("bar"); // #ref 14-14
+
+    // fsdl;afl;asl;gtwopjugpajg;ajlw;ejlr;jel;kal;d.dsfgagjg
+    // adding another comment here to check for skimming done properly or not
+    // one more test comment lol
+    console.log("bar"); // another commment here lol dsljfsdl
 }

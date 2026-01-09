@@ -40,7 +40,7 @@ export async function getSpecificComment(key, silent = false, filePath = null) {
   const token = session ? session.token : null;
 
   try {
-    const response = await fetch(`http://localhost:8000/comments/${encodeURIComponent(key)}?codebase=${encodeURIComponent(codebase)}`, {
+    const response = await fetch(`http://localhost:8080/comments/${encodeURIComponent(key)}?codebase=${encodeURIComponent(codebase)}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -66,7 +66,7 @@ export async function getSpecificComment(key, silent = false, filePath = null) {
 
   } catch (error) {
     if (error.code === 'ECONNREFUSED') {
-      if (!silent) console.error("Error: Could not connect to the backend server. Is it running on port 8000?");
+      if (!silent) console.error("Error: Could not connect to the backend server. Is it running on port 8080?");
       throw new Error("Connection failed");
     } else {
       // Re-throw so caller can handle "No comment found" etc.
