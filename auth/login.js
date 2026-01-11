@@ -3,6 +3,7 @@ import readline from "readline";
 // import { User } from "../models/User.js";
 import { saveSession } from "../utils/session.js";
 import { promptPassword } from "../utils/passwordPrompt.js";
+import { API_BASE_URL } from "../utils/config.js";
 
 async function resetPassword() {
   const rl = readline.createInterface({
@@ -51,7 +52,7 @@ async function resetPassword() {
   */
 
   try {
-    const response = await fetch("http://localhost:8080/forgot-password", {
+    const response = await fetch(`${API_BASE_URL}/forgot-password`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -127,7 +128,7 @@ export async function login() {
   */
 
   try {
-    const response = await fetch("http://localhost:8080/login", {
+    const response = await fetch(`${API_BASE_URL}/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

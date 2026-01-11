@@ -32,6 +32,7 @@
 import path from "path";
 import { getCurrentUserId } from "./utils/currentUser.js";
 import { getSession } from "./utils/session.js";
+import { API_BASE_URL } from "./utils/config.js";
 
 export async function editComment(key, value, filePath = null) {
   const codebase = filePath ? path.basename(filePath) : "default";
@@ -48,7 +49,7 @@ export async function editComment(key, value, filePath = null) {
   const token = session ? session.token : null;
 
   try {
-    const response = await fetch(`http://localhost:8080/comments/${encodeURIComponent(key)}?codebase=${encodeURIComponent(codebase)}`, {
+    const response = await fetch(`${API_BASE_URL}/comments/${encodeURIComponent(key)}?codebase=${encodeURIComponent(codebase)}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",

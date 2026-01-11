@@ -14,6 +14,7 @@
 import path from "path";
 import { getCurrentUserId } from "./utils/currentUser.js";
 import { getSession } from "./utils/session.js";
+import { API_BASE_URL } from "./utils/config.js";
 
 
 export async function getAllComments(filePath = null) {
@@ -34,7 +35,7 @@ export async function getAllComments(filePath = null) {
   // We'll pass the token in Authorization header if it exists.
 
   try {
-    const response = await fetch(`http://localhost:8080/comments?codebase=${encodeURIComponent(codebase)}`, {
+    const response = await fetch(`${API_BASE_URL}/comments?codebase=${encodeURIComponent(codebase)}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

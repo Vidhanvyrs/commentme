@@ -3,6 +3,7 @@ import readline from "readline";
 // import { User } from "../models/User.js";
 import { saveSession } from "../utils/session.js";
 import { promptPassword } from "../utils/passwordPrompt.js";
+import { API_BASE_URL } from "../utils/config.js";
 
 //signup function
 export async function signup() {
@@ -32,7 +33,7 @@ export async function signup() {
   const password = await promptPassword("Password: ");
 
   try {
-    const response = await fetch("http://localhost:8080/signup", {
+    const response = await fetch(`${API_BASE_URL}/signup`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

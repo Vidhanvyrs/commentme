@@ -43,6 +43,7 @@ import fs from "fs";
 import path from "path";
 // import { CommentStore } from "./models/CommentStore.js";
 import { getSession } from "./utils/session.js";
+import { API_BASE_URL } from "./utils/config.js";
 import { getCurrentUserId } from "./utils/currentUser.js";
 import { getCommentPattern, detectComments, formatReferenceComment } from "./utils/commentPatterns.js";
 
@@ -72,24 +73,35 @@ export async function removeCommentsFromFile(filePath, codebase = null) {
 
   // Use acorn for JavaScript files (more accurate), regex for others
   if (ext === "js" || ext === "jsx" || ext === "ts" || ext === "tsx") {
-    // Parse comments using acorn (existing working code)
-    acorn.parse(code, {
-      ecmaVersion: 2020,
-      locations: true,
-      onComment: (isBlock, text, start, end, startLoc, endLoc) => {
-        // Skip reference comments
-        if (text.trim().startsWith("#ref")) {
-          return;
+    try {
+      // Parse comments using acorn with module support
+      acorn.parse(code, {
+        ecmaVersion: 2020,
+        sourceType: "module",
+        locations: true,
+        onComment: (isBlock, text, start, end, startLoc, endLoc) => {
+          // Skip reference comments
+          if (text.trim().startsWith("#ref")) {
+            return;
+          }
+          comments.push({
+            start,
+            end,
+            text,
+            lineStart: startLoc.line,
+            lineEnd: endLoc.line,
+            isBlock: isBlock
+          });
         }
-        comments.push({
-          start,
-          end,
-          text,
-          lineStart: startLoc.line,
-          lineEnd: endLoc.line
-        });
-      }
-    });
+      });
+    } catch (e) {
+      // Clear half-populated comments from failed acorn parse
+      comments.length = 0;
+      // Fallback to regex-based detection if acorn fails (e.g., on JSX or TS syntax)
+      const pattern = getCommentPattern(filePath);
+      const detectedComments = detectComments(code, pattern);
+      comments.push(...detectedComments);
+    }
   } else {
     // Use regex-based detection for other file types
     const pattern = getCommentPattern(filePath);
@@ -111,7 +123,7 @@ export async function removeCommentsFromFile(filePath, codebase = null) {
 
   for (const c of comments) {
     const key = `${c.lineStart}-${c.lineEnd}`;
-    const refComment = formatReferenceComment(key, pattern);
+    const refComment = formatReferenceComment(key, pattern, c.isBlock);
 
     if (c.isInline) {
       // For inline comments: replace comment with reference, preserve code
@@ -130,7 +142,7 @@ export async function removeCommentsFromFile(filePath, codebase = null) {
   const token = session ? session.token : null;
 
   try {
-    const response = await fetch(`http://localhost:8080/comments/upload`, {
+    const response = await fetch(`${API_BASE_URL}/comments/upload`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
