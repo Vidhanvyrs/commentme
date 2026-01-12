@@ -19,6 +19,14 @@
   },
   "author": "dotlasher",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Vidhanvyrs/commentme.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Vidhanvyrs/commentme/issues"
+  },
+  "homepage": "https://github.com/Vidhanvyrs/commentme#readme",
   "keywords": [
     "cli",
     "comments",

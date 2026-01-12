@@ -1,6 +1,6 @@
 # commentme
 
-A CLI tool to manage and store your cluttered-code comments and give the codebase a clean look. Extract comments from your code files, store them in a database, visit commentme platform for UI-friendly seek and restore your comments line-wise later.
+An Open Source CLI tool to manage and store your cluttered-code comments and give the codebase a clean look. Extract comments from your code files, store them in a database, visit commentme platform for UI-friendly seek and restore your comments line-wise later.
 
 ## Installation
 
@@ -54,7 +54,4 @@ commentme --logout
 ## License
 
 MIT
-
-## Keywords
-
-`cli` `comments` `refactor` `cleanup` `productivity` `developer-tools` `linting` `code-management` `code-quality` `redaction` `code-base` `code-comment` `code-commenting` `code-commenting-tool` `code-commenting-cli` `code-commenting-cli-tool` `code-commenting-cli-tool-for-code-quality` `code-commenting-cli-tool-for-code-management` `code-commenting-cli-tool-for-code-quality-and-management` 
+ 
