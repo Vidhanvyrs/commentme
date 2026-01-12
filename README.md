@@ -1,6 +1,6 @@
 # commentme
 
-An Open Source CLI tool to manage and store your cluttered-code comments and give the codebase a clean look. Extract comments from your code files, store them in a database, visit commentme platform for UI-friendly seek and restore your comments line-wise later.
+An Open Source CLI tool connected with its own website to manage and store your cluttered-code comments and give the codebase a clean look. Extract comments from your code files, store them in a database, visit commentme platform for UI-friendly seek and restore your comments line-wise later.
 
 ## Installation
 
