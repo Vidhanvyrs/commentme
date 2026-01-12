@@ -47,9 +47,13 @@ export async function signup() {
       throw new Error(data.message || "Signup failed");
     }
 
-    saveSession(data);
+    // saveSession({
+    //   ...data,
+    //   token: data.accessToken
+    // });
+
     console.log("✔ Signup successful");
-    console.log("✔ Process ran successful");
+    console.log("👉 Please run 'commentme --login' to authenticate.");
   } catch (error) {
     if (error.code === 'ECONNREFUSED') {
       console.error("Error: Could not connect to the backend server. Is it running on port 8080?");

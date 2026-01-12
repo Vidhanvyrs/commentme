@@ -135,18 +135,20 @@ export async function removeCommentsFromFile(filePath, codebase = null) {
     }
   }
 
-  // Write file back
-  fs.writeFileSync(filePath, result, "utf8");
-
+  // Move file write after successful backend storage
   const session = getSession();
   const token = session ? session.token : null;
+
+  if (!token) {
+    throw new Error("Authentication token missing. Please log in again.");
+  }
 
   try {
     const response = await fetch(`${API_BASE_URL}/comments/upload`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": token ? `Bearer ${token}` : ""
+        "Authorization": `Bearer ${token}`
       },
       body: JSON.stringify({ codebase: codebase, comments: commentMap })
     });
@@ -157,14 +159,18 @@ export async function removeCommentsFromFile(filePath, codebase = null) {
       throw new Error(data.message || `Failed to upload comments for codebase: ${codebase}`);
     }
 
+    // ONLY write the file after successful backup to the server
+    fs.writeFileSync(filePath, result, "utf8");
     console.log(`✔ File skimmed and comments stored in database (codebase: ${codebase})`);
 
   } catch (error) {
     if (error.code === 'ECONNREFUSED') {
-      console.error("Error: Could not connect to the backend server. Is it running on port 8080?");
+      console.error("Error: Could not connect to the backend server. Is it running on Render?");
     } else {
       console.error("Error:", error.message);
     }
+    // Return early to prevent returning the "successful" state
+    return;
   }
 
   /*

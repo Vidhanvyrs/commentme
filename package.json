@@ -1,10 +1,24 @@
 {
   "name": "commentme",
   "version": "1.0.0",
+  "description": "A CLI tool to manage, redact and unredact your comments keeping the codebase clutterfree.",
   "type": "module",
+  "bin": {
+    "commentme": "./bin/commentme.js"
+  },
+  "main": "bin/commentme.js",
+  "files": [
+    "bin/",
+    "utils/",
+    "config/",
+    "auth/",
+    "*.js"
+  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "author": "dotlasher",
+  "license": "MIT",
   "dependencies": {
     "acorn": "^8.15.0",
     "bcryptjs": "^3.0.3",

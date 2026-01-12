@@ -56,11 +56,21 @@ Commands:
     */
 
     // 🔐 Skip auth ONLY for logout
-    if (command !== "--logout") {
+    // 🔐 Skip auth for logout, login, and signup
+    if (command !== "--logout" && command !== "--login" && command !== "--signup") {
       await ensureAuth();
     }
 
     switch (command) {
+      case "--login":
+        await import("../auth/login.js").then(m => m.login());
+        break;
+
+      case "--signup":
+        await import("../auth/signup.js").then(m => m.signup());
+        break;
+
+      case "--logout":
 
       case "--get":
         if (args[1] === "lines" && args[2]) {

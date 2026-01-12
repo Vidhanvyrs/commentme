@@ -26,6 +26,9 @@ export async function unskimComments(filePath, codebase = null) {
 
   const session = getSession();
   const token = session ? session.token : null;
+  if (!token) {
+    throw new Error("Authentication token missing. Please log in again.");
+  }
 
   let comments = {};
 
@@ -34,7 +37,7 @@ export async function unskimComments(filePath, codebase = null) {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": token ? `Bearer ${token}` : ""
+        "Authorization": `Bearer ${token}`
       }
     });
 
