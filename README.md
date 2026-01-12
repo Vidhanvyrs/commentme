@@ -8,33 +8,34 @@ npm install -g commentme
 
 ## Usage
 
-# Show help
+### Show help
 commentme --help
 
-# Login/Signup
-commentme --login
+### Signup
 commentme --signup
 
-# Get all comments
-commentme --get lines <file>
+### Login
+commentme --login
 
-# Get a specific comment
-commentme --get line-7-7 <file>
+### Get all comments
+commentme --get lines "file-name"
 
+### Get a specific comment
+commentme --get line-7-7 "file-name"
 
-# Edit a comment
-commentme --edit line-7-7 <file>
+### Edit a comment
+commentme --edit line-7-7 "file-name"
 
-# Delete a comment
-commentme --delete line-7-7 <file>
+### Delete a comment
+commentme --delete line-7-7 "file-name"
 
-# Redact comments from a file 
-commentme --skim <file>
+### Redact comments from a file 
+commentme --skim "file-name"
 
-# Restore comments to a file
-commentme --unskim <file>
+### Restore comments to a file
+commentme --unskim "file-name"
 
-# Logout
+### Logout
 commentme --logout
 
 ## Features
@@ -53,3 +54,7 @@ commentme --logout
 ## License
 
 MIT
+
+## Keywords
+
+`cli` `comments` `refactor` `cleanup` `productivity` `developer-tools` `linting` `code-management` `code-quality` `redaction` `code-base` `code-comment` `code-commenting` `code-commenting-tool` `code-commenting-cli` `code-commenting-cli-tool` `code-commenting-cli-tool-for-code-quality` `code-commenting-cli-tool-for-code-management` `code-commenting-cli-tool-for-code-quality-and-management` 

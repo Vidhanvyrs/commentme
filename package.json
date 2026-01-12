@@ -1,6 +1,6 @@
 {
   "name": "commentme",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A CLI tool to manage, redact and unredact your comments keeping the codebase clutterfree.",
   "type": "module",
   "bin": {
@@ -19,6 +19,18 @@
   },
   "author": "dotlasher",
   "license": "MIT",
+  "keywords": [
+    "cli",
+    "comments",
+    "refactor",
+    "cleanup",
+    "productivity",
+    "developer-tools",
+    "redaction",
+    "code-quality",
+    "linting",
+    "code-management"
+  ],
   "dependencies": {
     "acorn": "^8.15.0",
     "bcryptjs": "^3.0.3",
