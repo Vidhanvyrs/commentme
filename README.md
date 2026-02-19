@@ -1,6 +1,14 @@
-# commentme
+# CommentMe 🚀
 
-An Open Source CLI tool connected with its own website to manage and store your cluttered-code comments and give the codebase a clean look. Extract comments from your code files, store them in a database, visit commentme platform for UI-friendly seek and restore your comments line-wise later.
+**Declutter your codebase without losing context.**
+
+CommentMe is an AI-powered CLI toolkit designed for developers who value clean, readable code. It allows you to "skim" comments out of your source files into a secure vault, keeping your core logic pristine while maintaining a searchable, UI-friendly history on the web.
+
+### Key Capabilities:
+- 🧼 **Clean Code, Zero Loss**: Redact comments from files while keeping references for instant restoration.
+- 🤖 **AI Documentation**: Generate JSDocs and per-function comments automatically with LLMs.
+- 🧠 **Smart Explainer**: Get instant markdown-formatted architecture explanations for any code file.
+- 🌐 **Cloud Integration**: Manage and edit your extracted comments through a streamlined web interface.
 
 ## Installation
 ```bash
