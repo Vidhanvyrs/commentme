@@ -35,6 +35,29 @@ commentme --skim "file-name"
 ### Restore comments to a file
 commentme --unskim "file-name"
 
+### AI Generation
+Generate AI comments and JSDoc-style documentation for your code.
+```bash
+commentme --generate "file-name"
+```
+You can choose to generate comments per function, per class, or per line.
+
+### AI Explanation
+Generate a full markdown explanation of a code file.
+```bash
+commentme --explain "file-name"
+```
+
+### API Key Management
+Set your own OpenRouter API key to use the AI features.
+```bash
+# Set your API key
+commentme --set-key
+
+# Clear your saved API key
+commentme --clear-key
+```
+
 ### Logout
 commentme --logout
 
@@ -43,6 +66,9 @@ commentme --logout
 - Clutter-free and smooth codebase
 - Redact comments from files while keeping references
 - Restore comments back to files whenever required
+- **AI-powered documentation generation (Function/Class/Line level)**
+- **Full code explanation generator (Markdown output)**
+- **Secure API Key management for custom AI models**
 - User authentication and session management 
 - Per-codebase comment organization
 - Dedicated website for more UI friendly & AI edits on comments
