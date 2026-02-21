@@ -9,6 +9,7 @@ import { deleteComment } from "../deletecoms.js";
 import { removeCommentsFromFile as skim } from "../skimcoms.js";
 import { unskimComments as unskim } from "../unskimcoms.js";
 import { generateCommentsPerFunc, generateCommentsPerClass, generateCommentsPerLine, generateExplanation } from "../generate.js";
+import { sanitizeFile } from "../sanitize.js";
 // import { connectDB, disconnectDB } from "../config/db.js";
 import { ensureAuth } from "../auth/authGuard.js";
 import { logout } from "../auth/logout.js";
@@ -53,6 +54,7 @@ Commands:
   commentme --unskim <file>      Restore comments to a file
   commentme --generate <file>    Generate AI comments and docs for a file
   commentme --explain <file>     Generate a full markdown explanation of a code file
+  commentme --sanitize <file>    Sanitize file for production (removes noisy comments)
   commentme --set-key            Set your own OpenRouter API key (stored securely)
   commentme --clear-key          Remove your saved API key
   commentme --logout             Log out from your session
@@ -153,6 +155,11 @@ Select generation type:
         await generateExplanation(args[1]);
         break;
 
+      case "--sanitize":
+        if (!args[1]) throw new Error("Usage: commentme --sanitize <file>");
+        await sanitizeFile(args[1]);
+        break;
+
       case "--set-key": {
         console.log("Paste your OpenRouter API key (input is hidden):");
         const key = await promptPassword("🔑 API Key: ");
@@ -187,6 +194,7 @@ Commands:
   commentme --unskim <file>
   commentme --generate <file>
   commentme --explain <file>
+  commentme --sanitize <file>
   commentme --set-key
   commentme --clear-key
   commentme --logout
