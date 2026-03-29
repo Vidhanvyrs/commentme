@@ -16,7 +16,18 @@ import { logout } from "../auth/logout.js";
 import { saveApiKey, clearApiKey } from "../utils/apiKeyManager.js";
 import { promptPassword } from "../utils/passwordPrompt.js";
 import dotenv from "dotenv";
+import { readFileSync } from "fs";
+import { dirname, join } from "path";
+import { fileURLToPath } from "url";
+
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Read version from package.json
+const packageJson = JSON.parse(readFileSync(join(__dirname, "../package.json"), "utf8"));
+const version = packageJson.version;
 
 
 function promptInput(defaultValue = "") {
@@ -40,10 +51,15 @@ async function main() {
   console.log("Command:", command);
 
   try {
-    // Show help without connecting to DB or requiring auth
+    // Show help or version without connecting to DB or requiring auth
+    if (command === "--version" || command === "-v") {
+      console.log(`commentme version ${version}`);
+      return;
+    }
+
     if (command === "--help" || command === "-h" || !command) {
       console.log(`
-commentme CLI
+commentme CLI (v${version})
 
 Commands:
   commentme --get line-7-7 <file>      Get a specific comment by line range
@@ -57,7 +73,10 @@ Commands:
   commentme --sanitize <file>    Sanitize file for production (removes noisy comments)
   commentme --set-key            Set your own OpenRouter API key (stored securely)
   commentme --clear-key          Remove your saved API key
+  commentme --login              Log in to your account
+  commentme --signup             Create a new account
   commentme --logout             Log out from your session
+  commentme --version            Show version number
   commentme --help               Show this help message
 `);
       return;
@@ -181,7 +200,7 @@ Select generation type:
 
       default:
         console.log(`
-commentme CLI
+commentme CLI (v${version})
 
 Commands:
   commentme --login
@@ -198,6 +217,8 @@ Commands:
   commentme --set-key
   commentme --clear-key
   commentme --logout
+  commentme --version
+  commentme --help
 `);
     }
 
